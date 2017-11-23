@@ -1,0 +1,55 @@
+#
+# Build
+#
+
+build { core init test/xml_util }
+
+create_boot_directory
+
+#
+# Generate config
+#
+
+install_config {
+<config>
+	<parent-provides>
+		<service name="LOG"/>
+		<service name="ROM"/>
+		<service name="RAM"/>
+		<service name="PD"/>
+		<service name="CPU"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<start name="test_xml_util">
+		<resource name="RAM" quantum="1M"/>
+		<config>
+			<x part="1"/> 
+			<x part="2">
+				<y a="aa" b="=bee"> 
+					<z c="cee" d="dee">
+						<var a="hello" b="world"/>
+					</z> 
+				</y> 
+			</x>
+		</config>
+	</start>
+</config>
+}
+
+#
+# Boot image
+#
+
+build_boot_image { 
+	core 
+	init
+	ld.lib.so
+	libcsl.lib.so
+	test_xml_util 
+}
+
+append qemu_args " -nographic "
+
+run_genode_until "xml_util test completed.*\n" 10
